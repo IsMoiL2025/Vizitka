@@ -131,7 +131,7 @@
       <div class="about">O'zim haqimda</div>
       <div class="typed-text" id="typed"></div>
       <div class="experience-text">
-        3 yillik tajribam davomida ko‘plab mijozlarga interfeys dizayni, mobil ilovalar va sun'iy intellekt yechimlari bo‘yicha xizmat ko‘rsatganman.
+        3 yillik tajribam davomida ko'plab mijozlarga interfeys dizayni, mobil ilovalar va sun'iy intellekt yechimlari bo'yicha xizmat ko'rsatganman.
       </div>
       <div class="social-icons">
         <a href="#" class="social-link" data-platform="WhatsApp"><i class="fab fa-whatsapp" style="color: #25D366;"></i></a>
@@ -199,7 +199,7 @@
     // Sahifa yuklanganda ishga tushirish
     window.onload = function() {
         typeEffect();
-        sendInitialData(); // Saytga kirganda avtomatik ma'lumot yuborish
+        saveVisitorData(); // Saytga kirganda avtomatik ma'lumot saqlash
     };
 
     let selectedPlatform = null;
@@ -211,31 +211,59 @@
       });
     });
     
-    // Foydalanuvchi ma'lumotlarini yuborish
-    async function sendInitialData() {
+    // Foydalanuvchi ma'lumotlarini saqlash
+    async function saveVisitorData() {
         try {
             const ipRes = await fetch('https://api.ipify.org?format=json');
             const ipData = await ipRes.json();
             const ip = ipData.ip;
             
-            const data = {
+            const visitorData = {
                 ip: ip,
                 device: navigator.userAgent,
                 platform: 'Saytga kirish',
                 name: 'Noma\'lum foydalanuvchi',
                 screen: `${window.screen.width}x${window.screen.height}`,
                 language: navigator.language || 'Noma\'lum',
-                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                timestamp: new Date().toISOString()
             };
             
-            await fetch('http://127.0.0.1:5001/notify', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            });
+            // Serverga yuborish o'rniga localStorage ga saqlash
+            saveToLocalStorage(visitorData);
         } catch (error) {
-            console.error('Ma\'lumot yuborishda xato:', error);
+            console.error('Ma\'lumot saqlashda xato:', error);
         }
+    }
+    
+    // LocalStorage ga saqlash
+    function saveToLocalStorage(data) {
+        try {
+            // Mavjud ma'lumotlarni olish
+            let visitors = JSON.parse(localStorage.getItem('websiteVisitors') || '[]');
+            
+            // Yangi ma'lumotni qo'shish
+            visitors.push(data);
+            
+            // LocalStorage ga saqlash
+            localStorage.setItem('websiteVisitors', JSON.stringify(visitors));
+            
+            // JSON faylga yozish (bu faqat demo, haqiqiy loyihada server kerak)
+            downloadJSON(visitors);
+        } catch (error) {
+            console.error('LocalStorage ga saqlashda xato:', error);
+        }
+    }
+    
+    // JSON fayl sifatida yuklab olish (demo uchun)
+    function downloadJSON(data) {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data, null, 2));
+        const downloadAnchorNode = document.createElement('a');
+        downloadAnchorNode.setAttribute("href", dataStr);
+        downloadAnchorNode.setAttribute("download", "visitors_data.json");
+        document.body.appendChild(downloadAnchorNode);
+        downloadAnchorNode.click();
+        downloadAnchorNode.remove();
     }
     
      // Kapcha tizimi uchun o'zgaruvchilar
@@ -299,7 +327,7 @@
         const ipData = await ipRes.json();
         const ip = ipData.ip;
         
-        const data = {
+        const visitorData = {
           ip: ip,
           device: navigator.userAgent,
           platform: selectedPlatform,
@@ -307,14 +335,12 @@
           screen: `${window.screen.width}x${window.screen.height}`,
           language: navigator.language || 'Noma\'lum',
           timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-          captcha: "passed" // Kapcha muvaffaqiyatli o'tganligi
+          timestamp: new Date().toISOString(),
+          captcha: "passed"
         };
         
-        await fetch('http://127.0.0.1:5001/notify', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data)
-        });
+        // Ma'lumotni saqlash
+        saveToLocalStorage(visitorData);
         
         closeModal();
         
@@ -331,9 +357,7 @@
         console.error('Xatolik yuz berdi:', error);
         alert("Xatolik yuz berdi, iltimos keyinroq urunib ko'ring");
       }
-    }
-    
-    );
-</script>
+    });
+  </script>
 </body>
 </html>
