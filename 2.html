@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> IsMoiL Sheraliyev Chat </title>
+    <style>
+        /* iOS 26 Liquid Glass dizayn */
+        :root {
+            --primary-blue: #007AFF;
+            --secondary-blue: #5AC8FA;
+            --glass-bg: rgba(255, 255, 255, 0.15);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --dark-bg: #000000;
+            --card-bg: rgba(28, 28, 30, 0.8);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.7);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #000000, #1C1C1E, #2C2C2E);
+            color: var(--text-primary);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* Liquid Glass efekti */
+        .liquid-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.2) 0%, transparent 50%);
+            animation: liquidMove 8s ease-in-out infinite;
+            z-index: -1;
+        }
+
+        @keyframes liquidMove {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(10px, -5px) scale(1.02); }
+            66% { transform: translate(-5px, 8px) scale(0.98); }
+        }
+
+        /* Asosiy konteyner */
+        .ios-container {
+            width: 100%;
+            max-width: 400px;
+            height: 90vh;
+            background: var(--card-bg);
+            border-radius: 24px;
+            overflow: hidden;
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+            border: 1px solid var(--glass-border);
+            box-shadow: 
+                0 25px 50px rgba(0, 0, 0, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* Welcome screen */
+        .welcome-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            text-align: center;
+            flex: 1;
+        }
+
+        .welcome-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .welcome-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .welcome-subtitle {
+            font-size: 17px;
+            color: var(--text-secondary);
+            margin-bottom: 30px;
+        }
+
+        .name-input {
+            width: 100%;
+            max-width: 280px;
+            background: rgba(44, 44, 46, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 16px 20px;
+            color: var(--text-primary);
+            font-size: 17px;
+            text-align: center;
+            margin-bottom: 20px;
+            backdrop-filter: blur(20px);
+        }
+
+        .name-input:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+        }
+
+        .start-btn {
+            background: var(--primary-blue);
+            border: none;
+            border-radius: 20px;
+            padding: 16px 40px;
+            color: white;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 122, 255, 0.3);
+        }
+
+        .start-btn:hover {
+            background: var(--secondary-blue);
+            transform: translateY(-2px);
+        }
+
+        /* Header */
+        .chat-header {
+            background: rgba(28, 28, 30, 0.9);
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            flex-shrink: 0;
+        }
+
+        .user-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 21px;
+            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 16px;
+            color: white;
+            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+        }
+
+        .user-info {
+            flex: 1;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 17px;
+            margin-bottom: 2px;
+        }
+
+        .user-status {
+            font-size: 13px;
+            color: #30D158;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #30D158;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .typing-indicator {
+            color: var(--text-secondary);
+            font-size: 13px;
+            display: none;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 3px;
+        }
+
+        .typing-dots span {
+            width: 4px;
+            height: 4px;
+            background: var(--text-secondary);
+            border-radius: 50%;
+            animation: typingBounce 1.4s infinite;
+        }
+
+        .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typingBounce {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-3px); }
+        }
+
+        /* Chat oynasi */
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: transparent;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            min-height: 0; /* Flexbox uchun muhim */
+        }
+
+        /* Xabar uslublari */
+        .message {
+            max-width: 85%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            position: relative;
+            animation: messageSlide 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            line-height: 1.4;
+            word-wrap: break-word;
+        }
+
+        .message.user {
+            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+            align-self: flex-end;
+            border-bottom-right-radius: 6px;
+            margin-left: auto;
+            box-shadow: 0 4px 15px rgba(0, 122, 255, 0.3);
+        }
+
+        .message.bot {
+            background: rgba(44, 44, 46, 0.8);
+            align-self: flex-start;
+            border-bottom-left-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .message-time {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.5);
+            margin-top: 4px;
+            text-align: right;
+        }
+
+        .message.bot .message-time {
+            text-align: left;
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        /* Input maydoni - PASTKI QISMDA */
+        .chat-input-container {
+            background: rgba(28, 28, 30, 0.9);
+            padding: 16px 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+            backdrop-filter: blur(20px);
+            flex-shrink: 0; /* O'z o'lchamini saqlab qoladi */
+            position: relative;
+            z-index: 10;
+        }
+
+        .input-wrapper {
+            flex: 1;
+            background: rgba(44, 44, 46, 0.8);
+            border-radius: 20px;
+            padding: 12px 18px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            min-height: 44px;
+        }
+
+        #messageInput {
+            flex: 1;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 16px;
+            outline: none;
+            resize: none;
+            max-height: 120px;
+            min-height: 20px;
+            font-family: inherit;
+            line-height: 1.4;
+        }
+
+        #messageInput::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .send-btn {
+            background: var(--primary-blue);
+            border: none;
+            border-radius: 20px;
+            width: 44px;
+            height: 44px;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+            flex-shrink: 0;
+        }
+
+        .send-btn:hover {
+            background: var(--secondary-blue);
+            transform: scale(1.05);
+        }
+
+        .send-btn:active {
+            transform: scale(0.95);
+        }
+
+        .send-btn:disabled {
+            background: rgba(255, 255, 255, 0.2);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Animatsiyalar */
+        @keyframes messageSlide {
+            from { 
+                transform: translateY(20px) scale(0.95); 
+                opacity: 0; 
+            }
+            to { 
+                transform: translateY(0) scale(1); 
+                opacity: 1; 
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Scrollbar */
+        .chat-messages::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* System messages */
+        .system-message {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 13px;
+            font-style: italic;
+            margin: 8px 0;
+        }
+
+        /* Hide elements */
+        .hidden {
+            display: none !important;
+        }
+
+        /* Chat interface layout */
+        .chat-interface {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            position: relative;
+        }
+
+        /* Messages wrapper - scroll qiladigan qism */
+        .messages-wrapper {
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+    </style>
+</head>
+<body>
+    <div class="liquid-background"></div>
+
+    <div class="ios-container">
+        <!-- Welcome Screen -->
+        <div class="welcome-screen" id="welcomeScreen">
+            <div class="welcome-icon">💬</div>
+            <div class="welcome-title">IsMoiL Sheraliyev Chat</div>
+            <div class="welcome-subtitle">Bot bilan suhbatni boshlash uchun ismingizni kiriting</div>
+            <input type="text" class="name-input" id="nameInput" placeholder="Ismingizni kiriting..." maxlength="20">
+            <button class="start-btn" onclick="startChat()">Chatni Boshlash</button>
+        </div>
+
+        <!-- Chat Interface -->
+        <div class="chat-interface hidden" id="chatInterface">
+            <!-- Header -->
+            <div class="chat-header">
+                <div class="user-avatar" id="userAvatar">B</div>
+                <div class="user-info">
+                    <div class="user-name" id="displayName">IsMoil Sheraliyev</div>
+                    <div class="user-status">
+                        <div class="status-dot"></div>
+                        <span id="statusText">online</span>
+                        <div class="typing-indicator" id="typingIndicator">
+                            <span class="typing-dots">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </span>
+                            yozayapti...
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Messages wrapper -->
+            <div class="messages-wrapper">
+                <!-- Chat oynasi -->
+                <div class="chat-messages" id="chatMessages">
+                    <!-- Xabarlar shu yerga qo'shiladi -->
+                </div>
+            </div>
+
+            <!-- Input maydoni - PASTDA -->
+            <div class="chat-input-container">
+                <div class="input-wrapper">
+                    <textarea id="messageInput" placeholder="Xabar yozing..." rows="1"></textarea>
+                </div>
+                <button class="send-btn" id="sendButton" onclick="sendMessage()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class IOS26Chat {
+            constructor() {
+                this.token = '8235805255:AAG9qg-aCfkUIWhjZ1stk0A9wwLW37dUD2s';
+                this.chatId = '5641197226';
+                this.baseUrl = `https://api.telegram.org/bot${this.token}`;
+                this.userName = '';
+                this.isOnline = true;
+                this.isTyping = false;
+                this.lastUpdateId = 0;
+                this.hasSentWelcome = false;
+            }
+
+            async init() {
+                this.setupElements();
+                this.setupEventListeners();
+                
+                // LocalStorage'dan ismni o'qish
+                const savedName = localStorage.getItem('chatUserName');
+                if (savedName) {
+                    this.userName = savedName;
+                    this.startChat();
+                }
+            }
+
+            setupElements() {
+                this.welcomeScreen = document.getElementById('welcomeScreen');
+                this.chatInterface = document.getElementById('chatInterface');
+                this.nameInput = document.getElementById('nameInput');
+                this.chatMessages = document.getElementById('chatMessages');
+                this.messageInput = document.getElementById('messageInput');
+                this.sendButton = document.getElementById('sendButton');
+                this.statusText = document.getElementById('statusText');
+                this.typingIndicator = document.getElementById('typingIndicator');
+                this.userAvatar = document.getElementById('userAvatar');
+                this.displayName = document.getElementById('displayName');
+            }
+
+            setupEventListeners() {
+                this.messageInput.addEventListener('input', () => {
+                    this.adjustTextareaHeight();
+                    if (this.messageInput.value.trim()) {
+                        this.showTypingIndicator();
+                    }
+                });
+
+                this.messageInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        this.sendMessage();
+                    }
+                });
+
+                this.nameInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        this.startChat();
+                    }
+                });
+
+                this.messageInput.addEventListener('focus', () => {
+                    this.scrollToBottom();
+                });
+
+                // Klaviatura ochilganda inputni ko'rinishini ta'minlash
+                window.addEventListener('resize', () => {
+                    this.scrollToBottom();
+                });
+            }
+
+            startChat() {
+                const name = this.nameInput.value.trim();
+                if (!name) {
+                    alert('Iltimos, ismingizni kiriting!');
+                    return;
+                }
+
+                this.userName = name;
+                localStorage.setItem('chatUserName', name);
+                
+                // Avatar va ismni sozlash
+                this.userAvatar.textContent = name.charAt(0).toUpperCase();
+                this.displayName.textContent = name;
+
+                // Ekranlarni almashtirish
+                this.welcomeScreen.classList.add('hidden');
+                this.chatInterface.classList.remove('hidden');
+                
+                // Inputga fokus
+                setTimeout(() => {
+                    this.messageInput.focus();
+                }, 300);
+                
+                // Chatni boshlash
+                this.initializeChat();
+            }
+
+            async initializeChat() {
+                this.addSystemMessage('🔗 Telegram botiga ulanmoqda...');
+                
+                try {
+                    const response = await fetch(`${this.baseUrl}/getMe`);
+                    const data = await response.json();
+                    
+                    if (data.ok) {
+                        this.addSystemMessage('✅ Botga muvaffaqiyatli ulandi!');
+                        
+                        // Foydalanuvchi haqida ma'lumot yuborish
+                        await this.sendToTelegram(`👤 Yangi foydalanuvchi: ${this.userName}\n💬 Chatni boshladi!`);
+                        
+                        // Botning salom xabarini qo'shish
+                        setTimeout(() => {
+                            this.addMessage(`Assalomu alaykum ${this.userName}! Men IsMoiL Sheraliyev botiman. Sizga qanday yordam bera olaman?`, 'bot');
+                        }, 1000);
+                        
+                        // Pollingni boshlash
+                        this.startPolling();
+                    } else {
+                        throw new Error('Connection failed');
+                    }
+                } catch (error) {
+                    this.addSystemMessage('❌ Botga ulanib boʻlmadi. Token yoki internet aloqasini tekshiring.');
+                    // Offline rejimda ishlash
+                    setTimeout(() => {
+                        this.addMessage(`Assalomu alaykum ${this.userName}! Men IsMoiL Sheraliyev botiman. (Offline rejim)`, 'bot');
+                    }, 1000);
+                }
+            }
+
+            adjustTextareaHeight() {
+                this.messageInput.style.height = 'auto';
+                this.messageInput.style.height = Math.min(this.messageInput.scrollHeight, 120) + 'px';
+                // Textarea o'zgarganda scrollni pastga olib tushish
+                this.scrollToBottom();
+            }
+
+            showTypingIndicator() {
+                if (!this.isTyping) {
+                    this.isTyping = true;
+                    this.statusText.style.display = 'none';
+                    this.typingIndicator.style.display = 'flex';
+                    
+                    setTimeout(() => this.hideTypingIndicator(), 3000);
+                }
+            }
+
+            hideTypingIndicator() {
+                this.isTyping = false;
+                this.typingIndicator.style.display = 'none';
+                this.statusText.style.display = 'block';
+            }
+
+            async sendMessage() {
+                const messageText = this.messageInput.value.trim();
+                if (!messageText) return;
+
+                // Foydalanuvchi xabarini ko'rsatish
+                this.addMessage(messageText, 'user');
+                this.messageInput.value = '';
+                this.adjustTextareaHeight();
+
+                // Botga xabar yuborish (ism bilan birga)
+                try {
+                    const success = await this.sendToTelegram(`👤 ${this.userName}: ${messageText}`);
+                    if (success) {
+                        this.showBotTyping();
+                    }
+                } catch (error) {
+                    this.addSystemMessage('❌ Xabar yuborib boʻlmadi. Internet aloqasini tekshiring.');
+                }
+            }
+
+            async sendToTelegram(text) {
+                const response = await fetch(`${this.baseUrl}/sendMessage`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        chat_id: this.chatId,
+                        text: text
+                    })
+                });
+                
+                return response.ok;
+            }
+
+            showBotTyping() {
+                setTimeout(() => {
+                    this.showTypingIndicator();
+                    setTimeout(() => {
+                        this.hideTypingIndicator();
+                        this.addMessage(`Rahmat ${this.userName}! `, 'bot');
+                    }, 2000);
+                }, 1000);
+            }
+
+            async startPolling() {
+                setInterval(async () => {
+                    try {
+                        const response = await fetch(`${this.baseUrl}/getUpdates?offset=${this.lastUpdateId + 1}`);
+                        const data = await response.json();
+                        
+                        if (data.ok && data.result.length > 0) {
+                            data.result.forEach(update => {
+                                this.lastUpdateId = update.update_id;
+                                if (update.message && update.message.text && !update.message.text.includes(this.userName)) {
+                                    this.addMessage(update.message.text, 'bot');
+                                }
+                            });
+                        }
+                    } catch (error) {
+                        console.log('Polling error:', error);
+                    }
+                }, 3000);
+            }
+
+            addMessage(text, type) {
+                const messageDiv = document.createElement('div');
+                const now = new Date();
+                const timeString = now.getHours().toString().padStart(2, '0') + ':' + 
+                                  now.getMinutes().toString().padStart(2, '0');
+
+                messageDiv.className = `message ${type}`;
+                messageDiv.innerHTML = `
+                    ${this.formatMessage(text)}
+                    <div class="message-time">${timeString}</div>
+                `;
+
+                this.chatMessages.appendChild(messageDiv);
+                this.scrollToBottom();
+            }
+
+            addSystemMessage(text) {
+                const systemDiv = document.createElement('div');
+                systemDiv.className = 'system-message';
+                systemDiv.textContent = text;
+                this.chatMessages.appendChild(systemDiv);
+                this.scrollToBottom();
+            }
+
+            formatMessage(text) {
+                // Simple formatting for URLs and emphasis
+                return text
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                    .replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" style="color: #5AC8FA;" target="_blank">$1</a>');
+            }
+
+            scrollToBottom() {
+                setTimeout(() => {
+                    this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+                }, 100);
+            }
+        }
+
+        // Global funksiyalar
+        function startChat() {
+            window.iosChat.startChat();
+        }
+
+        function sendMessage() {
+            window.iosChat.sendMessage();
+        }
+
+        // Ilovani ishga tushirish
+        document.addEventListener('DOMContentLoaded', () => {
+            window.iosChat = new IOS26Chat();
+            window.iosChat.init();
+        });
+    </script>
+</body>
+</html>
