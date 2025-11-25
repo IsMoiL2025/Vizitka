@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -362,5 +362,700 @@
       }
     });
   </script>
+</body>
+</html> -->
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>IsMoiL - iOS Liquid Glass</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+/* ================================== */
+/* GLOBAL STYLES */
+/* ================================== */
+body {
+    margin: 0;
+    /* Qora fonni ozgina yorqinroq qilish, Liquid Glass effektini kuchaytirish uchun */
+    background: #0a0a0f; 
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+    color: white;
+    font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+}
+#canvas {
+    border: none; /* Liquid Glass uchun border yo'q */
+    border-radius: 15px;
+    /* Sketching Glass uslubi */
+    background: rgba(255, 255, 255, 0.05);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    max-width: 95%; /* Mobil uchun moslashish */
+    height: auto;
+}
+.info {
+    text-align: center;
+    margin-top: 15px;
+    font-size: 13px;
+    color: #ccc;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+.button-group {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+/* ================================== */
+/* LIQUID GLASS BUTTONS (IOS 26 USLUBI) */
+/* ================================== */
+.liquid-glass-button {
+    /* Glass Background */
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50px;
+    color: white;
+    padding: 12px 28px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(.17,.67,.83,.67); /* Smooth IOS like transition */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    position: relative;
+    overflow: hidden;
+    letter-spacing: 0.5px;
+}
+
+.liquid-glass-button:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3), 0 0 50px rgba(255, 255, 255, 0.1);
+}
+
+.liquid-glass-button:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Internal light ripple effect for Liquid Glass */
+.liquid-glass-button::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 300%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.2);
+    transform: skewX(-30deg);
+    transition: transform 0.5s ease-out;
+}
+
+.liquid-glass-button:hover::after {
+    transform: translateX(30%) skewX(-30deg);
+}
+
+/* ================================== */
+/* SOCIAL ICONS (ALREADY GOOD) */
+/* ================================== */
+.social-icons {
+    display: flex;
+    gap: 15px; 
+    margin-bottom: 20px;
+}
+.social-link {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    font-size: 24px;
+    color: white;
+    text-decoration: none;
+    cursor: pointer;
+
+    /* iOS Glasizm Effekti */
+    background: rgba(255, 255, 255, 0.15); /* Slightly less opaque */
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(12px); /* Stronger blur */
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+    
+    position: relative;
+    overflow: hidden;
+}
+
+.social-link:hover {
+    transform: scale(1.1) translateY(-2px);
+    box-shadow: 0 8px 35px rgba(255, 255, 255, 0.15), 0 0 10px rgba(255, 255, 255, 0.1);
+}
+
+/* Modal Stili - Liquid Glassga moslashtirildi */
+.modal-content {
+    /* Liquid Glass Modal */
+    background: rgba(26, 26, 46, 0.8); /* Darker transparent background */
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    padding: 30px;
+    border-radius: 25px; /* Yumaloqroq burchaklar */
+    max-width: 80%;
+    text-align: center;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+}
+.modal h2 {
+    color: #8c8cff; /* Yumshoqroq rang */
+    font-size: 28px;
+    margin-bottom: 15px;
+}
+.modal p {
+    color: #e0e0e0;
+}
+
+
+/* ================================== */
+/* MEDIA QUERIES (Responsive design) */
+/* ================================== */
+@media (max-width: 768px) {
+    .social-icons {
+        gap: 10px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    .social-link {
+        width: 45px;
+        height: 45px;
+        font-size: 20px;
+    }
+    .liquid-glass-button {
+        padding: 10px 20px;
+        font-size: 15px;
+    }
+    .button-group {
+        flex-direction: column;
+        gap: 10px;
+    }
+    #canvas {
+        max-height: 40vh; /* Mobil uchun balandlikni kamaytirish */
+    }
+}
+</style>
+</head>
+<body>
+
+<canvas id="canvas" width="1000" height="500"></canvas>
+
+<div class="info">
+    <div class="social-icons">
+        <a href="https://wa.me/YOUR_WHATSAPP_NUMBER" target="_blank" class="social-link" data-platform="WhatsApp" title="WhatsApp"><i class="fab fa-whatsapp" style="color: #25D366;"></i></a>
+        <a href="https://t.me/YOUR_TELEGRAM_USERNAME" target="_blank" class="social-link" data-platform="Telegram" title="Telegram"><i class="fab fa-telegram" style="color: #0088cc;"></i></a>
+        <a href="https://instagram.com/YOUR_INSTAGRAM_USERNAME" target="_blank" class="social-link" data-platform="Instagram" title="Instagram"><i class="fab fa-instagram" style="color: #E1306C;"></i></a>
+        <a href="tel:YOUR_PHONE_NUMBER" class="social-link" data-platform="Phone" title="Telefon"><i class="fas fa-phone"></i></a>
+        <a href="mailto:YOUR_EMAIL_ADDRESS" class="social-link" data-platform="Email" title="Email"><i class="fas fa-envelope"></i></a>
+    </div>
+
+    <div class="button-group">
+  <button class="liquid-glass-button" onclick="window.location.href='2.html'"><i class="fas fa-handshake"></i> 💬 Live chat...</button>
+  <button class="liquid-glass-button" onclick="window.location.href='3.html'"><i class="fas fa-info-circle"></i> Batafsil</button>
+</div>
+    
+    <div>IsMoiL Shearliyev®️</div>
+    <div style="font-size:11px; margin-top:4px;">
+      Barcha huquqlar himoyalangan © 2025
+    </div>
+</div>
+
+<script>
+/* =======================
+   PARTICLE LOGIC (O'ZGARMADI)
+==========================*/
+class Particle {
+    constructor() {
+        this.pos = { x: 0, y: 0 }
+        this.vel = { x: 0, y: 0 }
+        this.acc = { x: 0, y: 0 }
+        this.target = { x: 0, y: 0 }
+        this.closeEnoughTarget = 100
+        this.maxSpeed = 1.0
+        this.maxForce = 0.1
+        this.particleSize = 10
+        this.isKilled = false
+        this.startColor = { r: 0, g: 0, b: 0 }
+        this.targetColor = { r: 0, g: 0, b: 0 }
+        this.colorWeight = 0
+        this.colorBlendRate = 0.01
+    }
+
+    move() {
+        let proximityMult = 1
+        const dx = this.pos.x - this.target.x
+        const dy = this.pos.y - this.target.y
+        const dist = Math.sqrt(dx * dx + dy * dy)
+
+        if (dist < this.closeEnoughTarget) {
+            proximityMult = dist / this.closeEnoughTarget
+        }
+
+        const steerTo = {
+            x: (this.target.x - this.pos.x),
+            y: (this.target.y - this.pos.y)
+        }
+        const mag = Math.sqrt(steerTo.x ** 2 + steerTo.y ** 2)
+
+        if (mag > 0) {
+            steerTo.x = (steerTo.x / mag) * this.maxSpeed * proximityMult
+            steerTo.y = (steerTo.y / mag) * this.maxSpeed * proximityMult
+        }
+
+        const steer = {
+            x: steerTo.x - this.vel.x,
+            y: steerTo.y - this.vel.y
+        }
+
+        const steerMag = Math.sqrt(steer.x ** 2 + steer.y ** 2)
+        if (steerMag > 0) {
+            steer.x = (steer.x / steerMag) * this.maxForce
+            steer.y = (steer.y / steerMag) * this.maxForce
+        }
+
+        this.acc.x += steer.x
+        this.acc.y += steer.y
+
+        this.vel.x += this.acc.x
+        this.vel.y += this.acc.y
+        this.pos.x += this.vel.x
+        this.pos.y += this.vel.y
+
+        this.acc.x = 0
+        this.acc.y = 0
+    }
+
+    draw(ctx) {
+        if (this.colorWeight < 1.0) {
+            this.colorWeight = Math.min(this.colorWeight + this.colorBlendRate, 1.0)
+        }
+
+        const c = {
+            r: Math.round(this.startColor.r + (this.targetColor.r - this.startColor.r) * this.colorWeight),
+            g: Math.round(this.startColor.g + (this.targetColor.g - this.startColor.g) * this.colorWeight),
+            b: Math.round(this.startColor.b + (this.targetColor.b - this.startColor.b) * this.colorWeight),
+        }
+
+        ctx.fillStyle = `rgb(${c.r}, ${c.g}, ${c.b})`
+        ctx.fillRect(this.pos.x, this.pos.y, 2, 2)
+    }
+
+    kill(width, height) {
+        if (!this.isKilled) {
+            const rp = generateRandomPos(width / 2, height / 2, (width + height) / 2)
+            this.target.x = rp.x
+            this.target.y = rp.y
+
+            this.startColor = {
+                r: this.startColor.r + (this.targetColor.r - this.startColor.r) * this.colorWeight,
+                g: this.startColor.g + (this.targetColor.g - this.startColor.g) * this.colorWeight,
+                b: this.startColor.b + (this.targetColor.b - this.startColor.b) * this.colorWeight,
+            }
+
+            this.targetColor = { r: 0, g: 0, b: 0 }
+            this.colorWeight = 0
+            this.isKilled = true
+        }
+    }
+}
+
+function generateRandomPos(x, y, mag) {
+    const rx = Math.random() * 1000
+    const ry = Math.random() * 500
+
+    let dx = rx - x
+    let dy = ry - y
+    const m = Math.sqrt(dx * dx + dy * dy)
+
+    if (m > 0) {
+        dx = (dx / m) * mag
+        dy = (dy / m) * mag
+    }
+
+    return { x: x + dx, y: y + dy }
+}
+
+/* ========================
+   CANVAS + PARTICLES LOGIC (O'ZGARMADI)
+===========================*/
+const canvas = document.getElementById("canvas")
+const ctx = canvas.getContext("2d")
+
+const particles = []
+const pixelSteps = 6
+let wordIndex = 0
+let frameCount = 0
+
+const words = ["Salom", "IsMoiL", "Shearliyev", "Men", "Flutter", "Dasturchisiman"]
+
+const mouse = { x: 0, y: 0, pressed: false, right: false }
+
+function nextWord(word) {
+    const off = document.createElement("canvas")
+    off.width = canvas.width
+    off.height = canvas.height
+    const offCtx = off.getContext("2d")
+
+    offCtx.fillStyle = "white"
+    offCtx.font = "bold 110px Arial"
+    offCtx.textAlign = "center"
+    offCtx.textBaseline = "middle"
+    offCtx.fillText(word, canvas.width / 2, canvas.height / 2)
+
+    const img = offCtx.getImageData(0, 0, canvas.width, canvas.height)
+    const px = img.data
+
+    const newColor = {
+        r: Math.random() * 255,
+        g: Math.random() * 255,
+        b: Math.random() * 255
+    }
+
+    let pIndex = 0
+    const coords = []
+
+    for (let i = 0; i < px.length; i += pixelSteps * 4) {
+        coords.push(i)
+    }
+
+    coords.sort(() => Math.random() - 0.5)
+
+    for (const idx of coords) {
+        if (px[idx + 3] > 0) {
+            const x = (idx / 4) % canvas.width
+            const y = Math.floor(idx / 4 / canvas.width)
+
+            let p
+            if (pIndex < particles.length) {
+                p = particles[pIndex]
+                p.isKilled = false
+            } else {
+                p = new Particle()
+                const r = generateRandomPos(canvas.width / 2, canvas.height / 2, (canvas.width + canvas.height) / 2)
+                p.pos.x = r.x
+                p.pos.y = r.y
+                p.maxSpeed = Math.random() * 6 + 4
+                p.maxForce = p.maxSpeed * 0.05
+                p.particleSize = Math.random() * 6 + 6
+                p.colorBlendRate = Math.random() * 0.027 + 0.003
+                particles.push(p)
+            }
+
+            p.startColor = {
+                r: p.startColor.r + (p.targetColor.r - p.startColor.r) * p.colorWeight,
+                g: p.startColor.g + (p.targetColor.g - p.startColor.g) * p.colorWeight,
+                b: p.startColor.b + (p.targetColor.b - p.startColor.b) * p.colorWeight
+            }
+
+            p.targetColor = newColor
+            p.colorWeight = 0
+
+            p.target.x = x
+            p.target.y = y
+
+            pIndex++
+        }
+    }
+
+    for (let i = pIndex; i < particles.length; i++) {
+        particles[i].kill(canvas.width, canvas.height)
+    }
+}
+
+/* MODAL FUNCTIONS */
+function openModal() {
+    document.getElementById('modal').style.display = 'flex';
+}
+
+function closeModal() {
+    document.getElementById('modal').style.display = 'none';
+}
+
+window.addEventListener('click', function(event) {
+    const modal = document.getElementById('modal');
+    if (event.target === modal) {
+        closeModal();
+    }
+});
+
+/* ANIMATION LOOP */
+function animate() {
+    ctx.fillStyle = "rgba(0,0,0,0.1)"
+    ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+    for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i]
+        p.move()
+        p.draw(ctx)
+
+        if (p.isKilled) {
+            if (p.pos.x < 0 || p.pos.x > canvas.width || p.pos.y < 0 || p.pos.y > canvas.height) {
+                particles.splice(i, 1)
+            }
+        }
+    }
+
+    if (mouse.pressed && mouse.right) {
+        particles.forEach(p => {
+            const dx = p.pos.x - mouse.x
+            const dy = p.pos.y - mouse.y
+            const dist = Math.sqrt(dx * dx + dy * dy)
+            if (dist < 50) p.kill(canvas.width, canvas.height)
+        })
+    }
+
+    frameCount++
+    if (frameCount % 240 === 0) {
+        wordIndex = (wordIndex + 1) % words.length
+        nextWord(words[wordIndex])
+    }
+
+    requestAnimationFrame(animate)
+}
+
+/* MOUSE EVENTS */
+canvas.addEventListener("mousedown", e => {
+    mouse.pressed = true
+    mouse.right = e.button === 2
+    const r = canvas.getBoundingClientRect()
+    mouse.x = e.clientX - r.left
+    mouse.y = e.clientY - r.top
+})
+
+canvas.addEventListener("mouseup", () => {
+    mouse.pressed = false
+    mouse.right = false
+})
+
+canvas.addEventListener("mousemove", e => {
+    const r = canvas.getBoundingClientRect()
+    mouse.x = e.clientX - r.left
+    mouse.y = e.clientY - r.top
+})
+
+canvas.addEventListener("contextmenu", e => e.preventDefault())
+
+/* TOUCH EVENTS (Mobil qurilmalarda sichqoncha o'ng tugmasi funksiyasini qo'shish) */
+let pressTimer;
+canvas.addEventListener("touchstart", e => {
+    e.preventDefault();
+    const r = canvas.getBoundingClientRect()
+    mouse.x = e.touches[0].clientX - r.left
+    mouse.y = e.touches[0].clientY - r.top
+    mouse.pressed = true
+    
+    // Uzoq bosish (long press) o'ng tugma vazifasini bajaradi
+    pressTimer = setTimeout(() => {
+        mouse.right = true;
+    }, 500); // 500ms ushlab turganda
+}, { passive: false });
+
+canvas.addEventListener("touchend", () => {
+    clearTimeout(pressTimer);
+    mouse.pressed = false
+    mouse.right = false
+});
+
+canvas.addEventListener("touchmove", e => {
+    if (e.touches.length > 0) {
+        const r = canvas.getBoundingClientRect()
+        mouse.x = e.touches[0].clientX - r.left
+        mouse.y = e.touches[0].clientY - r.top
+    }
+}, { passive: true });
+
+
+/* START */
+nextWord(words[0])
+animate()
+
+
+/* ==========================================
+   TELEGRAM BOT INTEGRATSIYASI (Joylashuv bilan)
+============================================= */
+
+// DIQQAT: Quyidagi ikkita o'zgaruvchini to'ldiring!
+const BOT_TOKEN = '6592066300:AAED-lf6dpiRQy_k98s24dfR_1l2iMjms4U'; 
+const CHAT_ID = '5641197226'; 
+
+// Haqiqiy joylashuvni (koordinatalarni) olish
+function getGeolocation() {
+    return new Promise((resolve) => {
+        if ("geolocation" in navigator) {
+            // Ruxsat so'ralishi
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    resolve({
+                        status: 'OK',
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude
+                    });
+                },
+                (error) => {
+                    let errorMessage = 'Ruxsat berilmadi/Xatolik';
+                    if (error.code === error.PERMISSION_DENIED) {
+                        errorMessage = "Foydalanuvchi Geolocation so'rovini rad etdi.";
+                    }
+                    resolve({ status: 'ERROR', message: errorMessage });
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 5000,
+                    maximumAge: 0
+                }
+            );
+        } else {
+            resolve({ status: 'ERROR', message: 'Geolocation brauzer tomonidan quvvatlanmaydi.' });
+        }
+    });
+}
+
+async function sendVisitorInfo() {
+    let geoLoc = { status: 'ERROR', message: 'Haqiqiy koordinatalar yo\'q' };
+    
+    // Foydalanuvchidan joylashuv ruxsatini so'rash va olishga urinish
+    geoLoc = await getGeolocation();
+
+    try {
+        // 1. IP va Geolocation ma'lumotlarini olish (IP-ga asoslangan taxminiy manzil)
+        const response = await fetch('https://ipapi.co/json/');
+        const geoData = await response.json();
+        const ip = geoData.ip || 'Aniqlanmadi';
+        
+        // 2. Ism va Platformani aniqlash
+        const name = "Sayt Mehmoni (Liquid Glass)";
+        const userAgent = navigator.userAgent;
+        let selectedPlatform = "Desktop/Web";
+        if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent)) {
+            selectedPlatform = "Mobile/Smartfon";
+        }
+
+        // 3. Qurilma va vaqt ma'lumotlari
+        const timeString = new Date().toLocaleString('uz-UZ', { timeZone: 'Asia/Tashkent' });
+        
+        // Brauzer nomini ajratib olish
+        let browserInfo = userAgent;
+
+
+        // 4. Xabar matnini zamonaviy shakllantirish
+let message = `🎯 **Yangi Vizitka Qo'shildi** (Tasdiq: ✅)\n\n`;
+
+// Asosiy ma'lumotlar
+message += `👤 **Foydalanuvchi Ma'lumotlari:**\n`;
+message += `   • Ism: ${name}\n`;
+message += `   • Platforma: ${selectedPlatform}\n`;
+message += `   • Vaqt: ${timeString}\n\n`;
+
+// Geolokatsiya ma'lumotlari
+message += `📍 **Lokatsiya Ma'lumotlari:**\n`;
+message += `   • IP Manzil: ${ip}\n`;
+message += `   • Taxminiy Joylashuv: ${geoData.city || 'Noma\'lum'}, ${geoData.region || 'Noma\'lum'}, ${geoData.country_name || 'Noma\'lum'}\n`;
+
+if (geoLoc.status === 'OK') {
+    // Haqiqiy geolokatsiya mavjud bo'lsa
+    message += `   • 📍 **Aniq Geolokatsiya:**\n`;
+    message += `     - Kenglik: ${geoLoc.latitude}\n`;
+    message += `     - Uzunlik: ${geoLoc.longitude}\n`;
+    message += `     - [Google Maps'da ko'rish](https://maps.google.com/?q=${geoLoc.latitude},${geoLoc.longitude})\n`;
+} else {
+    message += `   • 📍 **Aniq Geolokatsiya:** ${geoLoc.message}\n`;
+}
+
+// Qurilma ma'lumotlari
+message += `\n💻 **Qurilma Ma'lumotlari:**\n`;
+message += `   • Brauzer: ${browserInfo.substring(0, 100)}...\n`;
+message += `   • Ekran O'lchami: ${window.screen.width}x${window.screen.height}\n`;
+message += `   • Til: ${navigator.language || 'Noma\'lum'}\n`;
+        // // 4. Xabar matnini shakllantirish
+        // let message = `🆕 **Yangi vizitka kirishi!** (Kapcha: ✅)\n\n`;
+        // message += `👤 *Ism*: ${name}\n`;
+        // message += `📱 *Platforma*: ${selectedPlatform}\n`;
+        // message += `🕒 *Vaqt*: ${timeString}\n\n`;
+
+        // message += `🌐 *IP manzil*: ${ip}\n`;
+        // message += `📍 *Taxminiy Lokatsiya (IP-asosida)*: ${geoData.city || 'Noma\'lum'}, ${geoData.region || 'Noma\'lum'}, ${geoData.country_name || 'Noma\'lum'}\n`;
+
+        // if (geoLoc.status === 'OK') {
+        //      // Haqiqiy manzilni qo'shish
+        //      message += `📌 **ANIQ GEOLOKATSIYA**: Mavjud\n`;
+        //      message += `   - *Kenglik*: ${geoLoc.latitude}\n`;
+        //      message += `   - *Uzunlik*: ${geoLoc.longitude}\n`;
+        // } else {
+        //      message += `📌 **ANIQ GEOLOKATSIYA**: ${geoLoc.message}\n`;
+        // }
+
+        // message += `\n🖥️ *Qurilma ma'lumotlari*:\n`;
+        // message += `   - *Brauzer*: ${browserInfo.substring(0, 100)}...\n`; // UserAgentni qisqartirish
+        // message += `   - *Ekran o'lchami*: ${window.screen.width}x${window.screen.height}\n`;
+        // message += `   - *Til*: ${navigator.language || 'Noma\'lum'}`;
+        
+        // 5. Telegram API orqali yuborish
+        if (BOT_TOKEN && CHAT_ID) {
+            await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    chat_id: CHAT_ID,
+                    text: message,
+                    parse_mode: 'Markdown' 
+                })
+            });
+            console.log("Ma'lumot Telegramga yuborildi!");
+
+            // Agar aniq joylashuv bo'lsa, xaritadagi manzilni ham yuborish
+            if (geoLoc.status === 'OK') {
+                await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendLocation`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        chat_id: CHAT_ID,
+                        latitude: geoLoc.latitude,
+                        longitude: geoLoc.longitude
+                    })
+                });
+                console.log("Aniq joylashuv xaritasi Telegramga yuborildi!");
+            }
+
+        } else {
+            console.warn("Telegram BOT Token yoki CHAT ID kiritilmagan!");
+        }
+
+    } catch (error) {
+        console.error("Ma'lumot yuborishda xatolik:", error);
+    }
+}
+
+// Sahifa yuklanishi bilan funksiyani ishga tushirish
+window.addEventListener('load', sendVisitorInfo);
+
+</script>
+
 </body>
 </html>
